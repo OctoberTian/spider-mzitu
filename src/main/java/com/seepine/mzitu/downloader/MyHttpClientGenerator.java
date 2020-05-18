@@ -1,8 +1,6 @@
 package com.seepine.mzitu.downloader;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.CookieStore;
 import org.apache.http.config.Registry;
@@ -14,19 +12,14 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.net.www.protocol.https.DefaultHostnameVerifier;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.downloader.CustomRedirectStrategy;
-import us.codecraft.webmagic.downloader.HttpClientGenerator;
 
 import javax.net.ssl.*;
-import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
@@ -35,7 +28,7 @@ import java.util.Map;
  * @date 2020-05-15 15:42
  */
 @Slf4j
-public class MyHttpClientGenerator{
+public class MyHttpClientGenerator {
     private transient Logger logger = LoggerFactory.getLogger(getClass());
 
     private PoolingHttpClientConnectionManager connectionManager;
@@ -53,15 +46,9 @@ public class MyHttpClientGenerator{
         try {
             return new SSLConnectionSocketFactory(createIgnoreVerifySSL(), new String[]{"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"},
                     null,
-                    new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String s, SSLSession sslSession) {
-                            return true;
-                        }
-                    }); // 优先绕过安全证书
-        } catch (KeyManagementException e) {
-            logger.error("ssl connection fail", e);
-        } catch (NoSuchAlgorithmException e) {
+                    // 优先绕过安全证书
+                    (s, sslSession) -> true);
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
             logger.error("ssl connection fail", e);
         }
         return SSLConnectionSocketFactory.getSocketFactory();
@@ -71,19 +58,21 @@ public class MyHttpClientGenerator{
         // 实现一个X509TrustManager接口，用于绕过验证，不用修改里面的方法
         X509TrustManager trustManager = new X509TrustManager() {
             @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            public void checkClientTrusted(X509Certificate[] chain, String authType) {
             }
+
             @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            public void checkServerTrusted(X509Certificate[] chain, String authType) {
             }
+
             @Override
             public X509Certificate[] getAcceptedIssuers() {
                 return null;
             }
         };
 
-        SSLContext sc =SSLContext.getInstance("SSL");
-        sc.init(null, new TrustManager[] { trustManager }, null);
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, new TrustManager[]{trustManager}, null);
         return sc;
     }
 
@@ -106,15 +95,9 @@ public class MyHttpClientGenerator{
             httpClientBuilder.setUserAgent("");
         }
         if (site.isUseGzip()) {
-            httpClientBuilder.addInterceptorFirst(new HttpRequestInterceptor() {
-
-                @Override
-                public void process(
-                        final HttpRequest request,
-                        final HttpContext context) throws HttpException, IOException {
-                    if (!request.containsHeader("Accept-Encoding")) {
-                        request.addHeader("Accept-Encoding", "gzip");
-                    }
+            httpClientBuilder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                if (!request.containsHeader("Accept-Encoding")) {
+                    request.addHeader("Accept-Encoding", "gzip");
                 }
             });
         }

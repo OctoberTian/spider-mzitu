@@ -1,9 +1,6 @@
 package com.seepine.mzitu;
 
-import com.seepine.mzitu.constant.CommonConstant;
-import com.seepine.mzitu.custom.CacheList;
 import com.seepine.mzitu.downloader.MyHttpClientDownloader;
-import com.seepine.mzitu.entity.Album;
 import com.seepine.mzitu.pipeline.DownloadPipeline;
 import com.seepine.mzitu.pipeline.PrintPipeline;
 import com.seepine.mzitu.util.DownloadUtil;
@@ -27,14 +24,14 @@ public class Main implements PageProcessor {
     @Override
     public void process(Page page) {
         //可能需要爬取
-        HashSet<String> set = new HashSet<String>();
+        HashSet<String> set = new HashSet<>();
         set.addAll(page.getHtml().links().regex("https://www\\.mzitu\\.com/\\d+").all());
         set.addAll(page.getHtml().links().regex("https://www\\.mzitu\\.com/page/\\d+/").all());
         //已爬取的
         List<String> alreadySet  = DownloadUtil.getInstance().get();
         //还未爬取的
         set.removeAll(alreadySet);
-        page.addTargetRequests(new ArrayList<String>(set));
+        page.addTargetRequests(new ArrayList<>(set));
         //这是图集的url时
         if(page.getUrl().regex("https://www\\.mzitu\\.com/\\d+").match()){
             //获取图集有多少图片

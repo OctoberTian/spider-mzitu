@@ -1,7 +1,6 @@
 package com.seepine.mzitu.entity;
 
 import cn.hutool.core.util.StrUtil;
-import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -61,6 +60,10 @@ public class Album implements Serializable {
         return Objects.equals(url, album.url);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(url);
+    }
 
     @Override
     public String toString() {

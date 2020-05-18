@@ -30,7 +30,7 @@ import java.util.Map;
 public class MyHttpClientDownloader extends AbstractDownloader {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final Map<String, CloseableHttpClient> httpClients = new HashMap<String, CloseableHttpClient>();
+    private final Map<String, CloseableHttpClient> httpClients = new HashMap<>();
 
     private MyHttpClientGenerator httpClientGenerator = new MyHttpClientGenerator();
 
@@ -50,7 +50,7 @@ public class MyHttpClientDownloader extends AbstractDownloader {
 
     private CloseableHttpClient getHttpClient(Site site) {
         if (site == null) {
-            return httpClientGenerator.getClient(null);
+            return null;
         }
         String domain = site.getDomain();
         CloseableHttpClient httpClient = httpClients.get(domain);

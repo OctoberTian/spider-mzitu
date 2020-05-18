@@ -17,7 +17,7 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
     private final String cacheFile;
     Class<T> clazz;
 
-    public CacheList(String nameSpace,Class<T> clazz) {
+    public CacheList(String nameSpace, Class<T> clazz) {
         this.clazz = clazz;
         String cacheFilePath = System.getProperty("user.dir") + SLASH + DIR_PATH + SLASH;
         System.out.println(cacheFilePath);
@@ -38,11 +38,15 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
     private File getFile(String cacheFilePath, String cacheFile) throws IOException {
         File filePath = new File(cacheFilePath);
         if (!filePath.exists()) {
-            filePath.mkdirs();
+            if (filePath.mkdirs()) {
+                throw new IOException("create dir fail");
+            }
         }
         File file = new File(cacheFile);
         if (!file.exists()) {
-            file.createNewFile();
+            if (file.createNewFile()) {
+                throw new IOException("create file fail");
+            }
         }
         return file;
     }
@@ -80,7 +84,7 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
             writer.flush();
             writer.close();
             System.out.println("移除成功");
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
 
         }
         return t;

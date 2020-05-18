@@ -8,8 +8,6 @@ import com.seepine.mzitu.entity.Album;
 import com.seepine.mzitu.entity.Image;
 import lombok.SneakyThrows;
 
-import java.io.File;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -23,7 +21,8 @@ public class DownloadUtil extends Thread {
      */
     final List<Album> albumList = new CacheList<>(CommonConstant.AWAIT_CACHE_NAME, Album.class);
     final List<String> alreadyList = new CacheList<>(CommonConstant.ALREADY_CACHE_NAME, String.class);
-    Boolean isRun;
+    final Object runLock;
+    boolean isRun;
 
     public static DownloadUtil getInstance() {
         if (downloadUtil == null) {
@@ -33,27 +32,28 @@ public class DownloadUtil extends Thread {
     }
 
     public DownloadUtil() {
-        isRun=false;
+        runLock = new Object();
+        isRun = false;
     }
 
 
     @SneakyThrows
     @Override
     public void run() {
-        if(isRun){
-            return;
-        }
-        synchronized (isRun){
-            isRun=true;
+        synchronized (runLock) {
+            if (isRun) {
+                return;
+            }
+            isRun = true;
         }
         while (isRun) {
             Album album = null;
             synchronized (albumList) {
                 if (!albumList.isEmpty()) {
                     album = albumList.get(0);
-                }else{
-                    synchronized (isRun){
-                        isRun=false;
+                } else {
+                    synchronized (runLock) {
+                        isRun = false;
                     }
                 }
             }
@@ -75,11 +75,11 @@ public class DownloadUtil extends Thread {
     }
 
     public void put(Album album) {
-        if(!albumList.contains(album)){
+        if (!albumList.contains(album)) {
             synchronized (albumList) {
                 albumList.add(album);
             }
-            if(!isRun){
+            if (!isRun) {
                 this.start();
             }
         }
