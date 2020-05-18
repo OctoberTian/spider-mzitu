@@ -2,7 +2,7 @@ package com.seepine.mzitu.constant;
 
 /**
  * @author Seepine
- * @create 2020-05-17 19:35
+ * @date 2020-05-17 19:35
  */
 public interface CommonConstant {
     String CACHE_PATH = "cache";

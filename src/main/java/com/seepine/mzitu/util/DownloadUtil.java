@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @author Seepine
- * @create 2020-05-18 12:53
+ * @date 2020-05-18 12:53
  */
 public class DownloadUtil extends Thread {
     static DownloadUtil downloadUtil;

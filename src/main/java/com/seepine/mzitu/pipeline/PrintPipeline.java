@@ -6,7 +6,7 @@ import us.codecraft.webmagic.pipeline.Pipeline;
 
 /**
  * @author Seepine
- * @create 2020-05-17 11:50
+ * @date 2020-05-17 11:50
  */
 public class PrintPipeline implements Pipeline {
     @Override

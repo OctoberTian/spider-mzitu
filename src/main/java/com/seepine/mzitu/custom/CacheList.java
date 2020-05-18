@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 /**
  * @author Seepine
- * @create 2020-05-18 14:11
+ * @date 2020-05-18 14:11
  */
 public class CacheList<T extends Serializable> extends LinkedList<T> {
 

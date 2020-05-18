@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * @author Seepine
- * @create 2020-05-15 15:39
+ * @date 2020-05-15 15:39
  */
 public class MyHttpClientDownloader extends AbstractDownloader {
     private Logger logger = LoggerFactory.getLogger(getClass());

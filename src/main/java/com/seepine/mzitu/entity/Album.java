@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * @author Seepine
- * @create 2020-05-18 11:08
+ * @date 2020-05-18 11:08
  */
 @Data
 public class Album implements Serializable {
