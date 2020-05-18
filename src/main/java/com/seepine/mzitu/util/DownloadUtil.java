@@ -62,7 +62,7 @@ public class DownloadUtil extends Thread {
                     HttpResponse response = HttpUtil.createGet(item.getImageUrl()).header("Referer", item.getReferer()).execute();
                     System.out.println(album.getPath() + item.getFileName());
                     response.writeBody(album.getPath() + item.getFileName());
-                    Thread.sleep(1000);
+                    Thread.sleep(CommonConstant.DOWNLOAD_MILLIS);
                 }
                 synchronized (albumList) {
                     albumList.remove(0);

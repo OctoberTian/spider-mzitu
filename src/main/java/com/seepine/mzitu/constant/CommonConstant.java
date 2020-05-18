@@ -5,10 +5,10 @@ package com.seepine.mzitu.constant;
  * @date 2020-05-17 19:35
  */
 public interface CommonConstant {
-    String CACHE_PATH = "cache";
-
     String AWAIT_CACHE_NAME = "await";
     String ALREADY_CACHE_NAME = "already";
 
-    String IMAGE_PATH = "images";
+    long DOWNLOAD_MILLIS = 1000;
+    int CRAWL_MILLIS = 5000;
+    int CRAWL_THREAD_NUM = 1;
 }
