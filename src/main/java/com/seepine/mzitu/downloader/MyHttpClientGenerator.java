@@ -27,7 +27,6 @@ import java.util.Map;
  * @author Seepine
  * @date 2020-05-15 15:42
  */
-@Slf4j
 public class MyHttpClientGenerator {
     private transient Logger logger = LoggerFactory.getLogger(getClass());
 

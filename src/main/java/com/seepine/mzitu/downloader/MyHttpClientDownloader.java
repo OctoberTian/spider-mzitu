@@ -73,19 +73,49 @@ public class MyHttpClientDownloader extends AbstractDownloader {
         }
         CloseableHttpResponse httpResponse = null;
         CloseableHttpClient httpClient = getHttpClient(task.getSite());
-        Proxy proxy = proxyProvider != null ? proxyProvider.getProxy(task) : null;
+        Proxy proxy = null;
+        try {
+            proxy = proxyProvider != null ? proxyProvider.getProxy(task) : null;
+        } catch (Exception ignored) {
+        }
         HttpClientRequestContext requestContext = httpUriRequestConverter.convert(request, task.getSite(), proxy);
         Page page = Page.fail();
         try {
             httpResponse = httpClient.execute(requestContext.getHttpUriRequest(), requestContext.getHttpClientContext());
             page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), httpResponse, task);
             onSuccess(request);
-            logger.info("downloading page success {}", request.getUrl());
             return page;
         } catch (IOException e) {
             logger.warn("download page {} error", request.getUrl(), e);
             onError(request);
             return page;
+        } finally {
+            if (httpResponse != null) {
+                //ensure the connection is released back to pool
+                EntityUtils.consumeQuietly(httpResponse.getEntity());
+            }
+            if (proxyProvider != null && proxy != null) {
+                proxyProvider.returnProxy(proxy, page, task);
+            }
+        }
+    }
+
+    public void downloadFile(Request request, Task task) {
+        if (task == null || task.getSite() == null) {
+            throw new NullPointerException("task or site can not be null");
+        }
+        CloseableHttpResponse httpResponse = null;
+        CloseableHttpClient httpClient = getHttpClient(task.getSite());
+        Proxy proxy = proxyProvider != null ? proxyProvider.getProxy(task) : null;
+        HttpClientRequestContext requestContext = httpUriRequestConverter.convert(request, task.getSite(), proxy);
+        Page page = Page.fail();
+        try {
+            httpResponse = httpClient.execute(requestContext.getHttpUriRequest(), requestContext.getHttpClientContext());
+            //page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), httpResponse, task);
+            //onSuccess(request);
+        } catch (IOException e) {
+            logger.warn("download page {} error", request.getUrl(), e);
+            onError(request);
         } finally {
             if (httpResponse != null) {
                 //ensure the connection is released back to pool
@@ -107,7 +137,7 @@ public class MyHttpClientDownloader extends AbstractDownloader {
         String contentType = httpResponse.getEntity().getContentType() == null ? "" : httpResponse.getEntity().getContentType().getValue();
         Page page = new Page();
         page.setBytes(bytes);
-        if (!request.isBinaryContent()){
+        if (!request.isBinaryContent()) {
             if (charset == null) {
                 charset = getHtmlCharset(contentType, bytes);
             }
