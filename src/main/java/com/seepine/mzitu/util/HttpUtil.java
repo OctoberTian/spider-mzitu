@@ -1,5 +1,7 @@
 package com.seepine.mzitu.util;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import com.seepine.mzitu.constant.CommonConstant;
 import com.seepine.mzitu.downloader.MyHttpClientGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +44,7 @@ public class HttpUtil {
         CloseableHttpClient httpClient = getHttpClient();
         Proxy proxy = null;
         try {
-            proxyProvider.getProxy(null);
+            proxy = proxyProvider.getProxy(null);
         } catch (Exception ignored) {
         }
         HttpClientRequestContext requestContext = httpUriRequestConverter.convert(request, site, proxy);
@@ -50,15 +52,8 @@ public class HttpUtil {
         CloseableHttpResponse httpResponse = httpClient.execute(requestContext.getHttpUriRequest(), requestContext.getHttpClientContext());
         HttpEntity entity = httpResponse.getEntity();
         InputStream in = entity.getContent();
-        File file = new File(destFileName);
-        FileOutputStream fout = new FileOutputStream(file);
-        int l;
-        byte[] tmp = new byte[1024];
-        while ((l = in.read(tmp)) != -1) {
-            fout.write(tmp, 0, l);
-        }
-        fout.flush();
-        fout.close();
+        FileUtil.writeFromStream(in,destFileName);
+
         in.close();
         EntityUtils.consumeQuietly(httpResponse.getEntity());
     }
