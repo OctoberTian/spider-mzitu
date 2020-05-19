@@ -1,7 +1,7 @@
 package com.seepine.mzitu.custom;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
+import cn.hutool.json.JSONUtil;
 import com.seepine.mzitu.util.FileUtil;
 
 import java.io.*;
@@ -29,7 +29,7 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
             BufferedReader reader = new BufferedReader(new FileReader(cacheFile));
             String line;
             while ((line = reader.readLine()) != null) {
-                this.add(JSON.parseObject(line, clazz));
+                this.add(JSONUtil.toBean(line, clazz));
             }
             reader.close();
             writer = new BufferedWriter(new FileWriter(cacheFile, true));
@@ -49,7 +49,7 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
             return false;
         }
         //做文件缓存
-        String json = JSON.toJSONString(t);
+        String json = JSONUtil.toJsonStr(t);
         if (StrUtil.isBlank(json)) {
             return false;
         }
