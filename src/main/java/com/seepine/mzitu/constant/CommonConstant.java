@@ -28,7 +28,9 @@ public interface CommonConstant {
      * 下载图片线程数(ps: max <= 2*cpuNum)
      */
     int DOWNLOAD_THREAD_NUM = 1;
-
+    /**
+     * 爬取Site配置
+     */
     Site SITE = Site.me()
             .setDomain("https://www.mzitu.com")
             .setUseGzip(true)
@@ -38,8 +40,9 @@ public interface CommonConstant {
             .addHeader("Accept-Language", "zh-CN,zh;q=0.9")
             .addHeader("Referer", "https://www.mzitu.com")
             .setRetryTimes(3).setSleepTime(CommonConstant.CRAWL_MILLIS);
-
-
+    /**
+     * 代理池配置
+     */
     Proxy[] PROXY_ARRAY = {
             //new Proxy("ip", port)
             //new Proxy("ip", port,"username","password")
