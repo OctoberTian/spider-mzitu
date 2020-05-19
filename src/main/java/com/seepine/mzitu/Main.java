@@ -6,6 +6,7 @@ import com.seepine.mzitu.pipeline.DownloadPipeline;
 import com.seepine.mzitu.pipeline.PrintPipeline;
 import com.seepine.mzitu.processor.CrawlPageProcessor;
 import us.codecraft.webmagic.*;
+import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 
 /**
  * @author Seepine
@@ -13,13 +14,21 @@ import us.codecraft.webmagic.*;
  */
 public class Main {
 
+
+
     public static void main(String[] args) {
-        Spider.create(new CrawlPageProcessor())
+        MyHttpClientDownloader myHttpClientDownloader = new MyHttpClientDownloader();
+
+        myHttpClientDownloader.setProxyProvider(SimpleProxyProvider.from(CommonConstant.PROXY_ARRAY));
+
+        Spider spider = Spider.create(new CrawlPageProcessor())
                 .addPipeline(new PrintPipeline())
                 .addPipeline(new DownloadPipeline())
-                .setDownloader(new MyHttpClientDownloader())
+                .setDownloader(myHttpClientDownloader)
                 .addUrl("https://www.mzitu.com/")
-                .thread(CommonConstant.CRAWL_THREAD_NUM).run();
+                .thread(CommonConstant.CRAWL_THREAD_NUM);
+        spider.start();
     }
+
 
 }
