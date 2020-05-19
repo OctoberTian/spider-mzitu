@@ -33,6 +33,7 @@ public class FileUtil {
 
     public boolean isValidFile(final String filePath) {
         File file = new File(filePath);
-        return file.exists() && file.isFile() && file.length() > 0;
+        //至少图片大小要10KB才认定为有效,否则会重下
+        return file.exists() && file.isFile() && file.length() > 10 * 1024;
     }
 }
