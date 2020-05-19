@@ -1,28 +1,23 @@
 package com.seepine.mzitu.util;
 
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import com.seepine.mzitu.constant.CommonConstant;
-import com.seepine.mzitu.custom.CacheList;
 import com.seepine.mzitu.entity.Album;
 import com.seepine.mzitu.entity.Image;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import us.codecraft.webmagic.Request;
 
-import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * @author Seepine
  * @date 2020-05-18 12:53
  */
+@Slf4j
 public class DownloadUtil extends Thread {
     static DownloadUtil downloadUtil;
-    /**
-     * 带缓存的list
-     */
-    final List<Album> albumList = new CacheList<>(CommonConstant.AWAIT_CACHE_NAME, Album.class);
-    final List<String> alreadyList = new CacheList<>(CommonConstant.ALREADY_CACHE_NAME, String.class);
-    final Object runLock;
-    boolean isRun;
+
+    ExecutorService threadPool = ThreadUtil.newExecutor(CommonConstant.DOWNLOAD_THREAD_NUM);
 
     public static DownloadUtil getInstance() {
         if (downloadUtil == null) {
@@ -32,62 +27,33 @@ public class DownloadUtil extends Thread {
     }
 
     public DownloadUtil() {
-        runLock = new Object();
-        isRun = false;
-    }
-
-
-    @SneakyThrows
-    @Override
-    public void run() {
-        synchronized (runLock) {
-            if (isRun) {
-                return;
-            }
-            isRun = true;
-        }
-        while (isRun) {
-            Album album = null;
-            synchronized (albumList) {
-                if (!albumList.isEmpty()) {
-                    album = albumList.get(0);
-                } else {
-                    synchronized (runLock) {
-                        isRun = false;
-                    }
-                }
-            }
-            if (album != null) {
-                for (Image item : album.getImageList()) {
-                    HttpResponse response = HttpUtil.createGet(item.getImageUrl()).header("Referer", item.getReferer()).execute();
-                    System.out.println(album.getPath() + item.getFileName());
-                    response.writeBody(album.getPath() + item.getFileName());
-                    Thread.sleep(CommonConstant.DOWNLOAD_MILLIS);
-                }
-                synchronized (albumList) {
-                    albumList.remove(0);
-                }
-                synchronized (alreadyList) {
-                    alreadyList.add(album.getUrl());
-                }
-            }
-        }
     }
 
     public void put(Album album) {
-        if (!albumList.contains(album)) {
-            synchronized (albumList) {
-                albumList.add(album);
-            }
-            if (!isRun) {
-                this.start();
-            }
-        }
-    }
-
-    public List<String> get() {
-        synchronized (alreadyList) {
-            return this.alreadyList;
+        if (album != null) {
+            threadPool.execute(() -> {
+                log.info("thread " + Thread.currentThread().getId() + "启动任务");
+                for (Image item : album.getImageList()) {
+                    try {
+                        String filePath = album.getPath() + item.getFileName();
+                        if (!FileUtil.isValidFile(filePath)) {
+                            FileUtil.createDir(album.getPath());
+                            FileUtil.createFile(filePath);
+                            Request request = new Request(item.getImageUrl());
+                            request.addHeader("Referer", item.getReferer());
+                            HttpUtil.downloadFile(request, filePath);
+                            log.info("文件已下载：" + filePath);
+                            ThreadUtil.sleep(CommonConstant.DOWNLOAD_MILLIS);
+                        } else {
+                            log.info("文件已下载：" + filePath);
+                        }
+                        CacheUtil.getInstance().push(album.getUrl());
+                    } catch (Exception e) {
+                        log.error("thread " + Thread.currentThread().getId() + ":" + e.getMessage());
+                    }
+                }
+                log.info("thread " + Thread.currentThread().getId() + "结束任务");
+            });
         }
     }
 }

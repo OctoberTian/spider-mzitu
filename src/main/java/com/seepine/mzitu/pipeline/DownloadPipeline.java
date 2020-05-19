@@ -3,7 +3,9 @@ package com.seepine.mzitu.pipeline;
 import cn.hutool.core.util.StrUtil;
 import com.seepine.mzitu.entity.Album;
 import com.seepine.mzitu.entity.Image;
+import com.seepine.mzitu.util.CacheUtil;
 import com.seepine.mzitu.util.DownloadUtil;
+import lombok.SneakyThrows;
 import us.codecraft.webmagic.ResultItems;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.pipeline.Pipeline;
@@ -19,11 +21,12 @@ public class DownloadPipeline implements Pipeline {
 
     @Override
     public void process(ResultItems resultItems, Task task) {
+        if (resultItems.get("title") == null || CacheUtil.getInstance().contains(resultItems.getRequest().getUrl())) {
+            return;
+        }
+        Album album = new Album(resultItems.getRequest().getUrl(), resultItems.get("title").toString(), resultItems.get("time").toString(), resultItems.get("category").toString());
 
-        Album album = new Album(resultItems.getRequest().getUrl(),resultItems.get("title").toString(),resultItems.get("time").toString(),resultItems.get("category").toString());
-
-
-        List<Image> imageList=new ArrayList<>();
+        List<Image> imageList = new ArrayList<>();
 
         String imageUrlFirst = resultItems.get("imageUrl").toString();
         String urlPrefix = imageUrlFirst.substring(0, imageUrlFirst.length() - 6);
