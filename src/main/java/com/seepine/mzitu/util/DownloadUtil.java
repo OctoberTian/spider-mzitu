@@ -33,6 +33,7 @@ public class DownloadUtil extends Thread {
         if (album != null) {
             threadPool.execute(() -> {
                 log.info("thread " + Thread.currentThread().getId() + "启动任务");
+                int count = 0;
                 for (Image item : album.getImageList()) {
                     try {
                         String filePath = album.getPath() + item.getFileName();
@@ -43,14 +44,17 @@ public class DownloadUtil extends Thread {
                             request.addHeader("Referer", item.getReferer());
                             HttpUtil.downloadFile(request, filePath);
                             log.info("文件已下载：" + filePath);
+                            count++;
                             ThreadUtil.sleep(CommonConstant.DOWNLOAD_MILLIS);
                         } else {
                             log.info("文件已下载：" + filePath);
                         }
-                        CacheUtil.getInstance().push(album.getUrl());
                     } catch (Exception e) {
                         log.error("thread " + Thread.currentThread().getId() + ":" + e.getMessage());
                     }
+                }
+                if (count == album.getImageList().size()) {
+                    CacheUtil.getInstance().push(album.getUrl());
                 }
                 log.info("thread " + Thread.currentThread().getId() + "结束任务");
             });
