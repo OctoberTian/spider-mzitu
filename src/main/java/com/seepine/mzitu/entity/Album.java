@@ -41,11 +41,17 @@ public class Album implements Serializable {
 
     public Album(String url, String title, String time, String category) {
         this.url = url;
-        this.title = title;
+        this.title = title.replace("/", "_").replace("\\", "_");
         this.time = time;
         this.category = category;
         this.path = StrUtil.SLASH + "images" + StrUtil.SLASH + this.category + StrUtil.SLASH + this.time + StrUtil.UNDERLINE + this.title + StrUtil.SLASH;
-        this.path = System.getProperty("user.dir") + this.path.replace(":", ".");
+        this.path = System.getProperty("user.dir") + this.path.replace(":", ".")
+                .replace("*", ".")
+                .replace("?", ".")
+                .replace("\"", ".")
+                .replace("<", ".")
+                .replace(">", ".")
+                .replace("|", ".");
     }
 
     @Override
