@@ -44,11 +44,11 @@ public class DownloadUtil extends Thread {
                             request.addHeader("Referer", item.getReferer());
                             HttpUtil.downloadFile(request, filePath);
                             log.info("文件已下载：" + filePath);
-                            count++;
                             ThreadUtil.sleep(CommonConstant.DOWNLOAD_MILLIS);
                         } else {
                             log.info("文件已下载：" + filePath);
                         }
+                        count++;
                     } catch (Exception e) {
                         log.error("thread " + Thread.currentThread().getId() + ":" + e.getMessage());
                     }
