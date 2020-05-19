@@ -1,6 +1,8 @@
 package com.seepine.mzitu.custom;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.seepine.mzitu.util.FileUtil;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -14,41 +16,26 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
     private final static String DIR_PATH = "cache";
     private final static String SUFFIX = ".cache";
     private final static String SLASH = "/";
-    private final String cacheFile;
     Class<T> clazz;
+    BufferedWriter writer = null;
 
     public CacheList(String nameSpace, Class<T> clazz) {
         this.clazz = clazz;
-        String cacheFilePath = System.getProperty("user.dir") + SLASH + DIR_PATH + SLASH;
-        System.out.println(cacheFilePath);
-        cacheFile = cacheFilePath + nameSpace + SUFFIX;
+        String cacheFilePath = System.getProperty("user.dir") + SLASH + DIR_PATH;
+        String cacheFile = cacheFilePath + SLASH + nameSpace + SUFFIX;
         try {
-            getFile(cacheFilePath, cacheFile);
+            FileUtil.createDir(cacheFilePath);
+            FileUtil.createFile(cacheFile);
             BufferedReader reader = new BufferedReader(new FileReader(cacheFile));
             String line;
             while ((line = reader.readLine()) != null) {
                 this.add(JSON.parseObject(line, clazz));
             }
             reader.close();
+            writer = new BufferedWriter(new FileWriter(cacheFile, true));
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private File getFile(String cacheFilePath, String cacheFile) throws IOException {
-        File filePath = new File(cacheFilePath);
-        if (!filePath.exists()) {
-            if (filePath.mkdirs()) {
-                throw new IOException("create dir fail");
-            }
-        }
-        File file = new File(cacheFile);
-        if (!file.exists()) {
-            if (file.createNewFile()) {
-                throw new IOException("create file fail");
-            }
-        }
-        return file;
     }
 
     @Override
@@ -58,35 +45,24 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
 
     @Override
     public boolean add(T t) {
+        if (t == null) {
+            return false;
+        }
         //做文件缓存
         String json = JSON.toJSONString(t);
+        if (StrUtil.isBlank(json)) {
+            return false;
+        }
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile, true));
-            writer.write(json);
-            writer.newLine();
-            writer.flush();
-            writer.close();
+            System.out.println(json);
+            if (writer != null) {
+                writer.write(json);
+                writer.newLine();
+                writer.flush();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return super.add(t);
-    }
-
-    @Override
-    public T remove(int index) {
-        T t = super.remove(index);
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile));
-            for (T value : this) {
-                writer.write(JSON.toJSONString(value));
-                writer.newLine();
-            }
-            writer.flush();
-            writer.close();
-            System.out.println("移除成功");
-        } catch (Exception ignored) {
-
-        }
-        return t;
     }
 }
