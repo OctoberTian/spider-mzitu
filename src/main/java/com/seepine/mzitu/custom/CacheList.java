@@ -54,7 +54,6 @@ public class CacheList<T extends Serializable> extends LinkedList<T> {
             return false;
         }
         try {
-            System.out.println(json);
             if (writer != null) {
                 writer.write(json);
                 writer.newLine();
