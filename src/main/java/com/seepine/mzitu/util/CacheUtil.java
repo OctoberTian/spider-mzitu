@@ -2,6 +2,7 @@ package com.seepine.mzitu.util;
 
 import com.seepine.mzitu.constant.CommonConstant;
 import com.seepine.mzitu.custom.CacheList;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * @author Seepine
  * @date 2020-05-18 21:26
  */
+@Slf4j
 public class CacheUtil {
     static CacheUtil cacheUtil;
     final List<String> alreadyList;
@@ -26,7 +28,10 @@ public class CacheUtil {
 
     public void push(String url) {
         synchronized (alreadyList) {
-            alreadyList.add(url);
+            if (!alreadyList.contains(url)) {
+                alreadyList.add(url);
+                log.info("已全部爬取完成：" + url);
+            }
         }
     }
 
