@@ -14,14 +14,12 @@ import us.codecraft.webmagic.pipeline.Pipeline;
 public class PrintPipeline implements Pipeline {
     @Override
     public void process(ResultItems resultItems, Task task) {
-        if (resultItems.get("title") != null) {
-            String stringBuilder =
+        String stringBuilder =
                     "Album url："+resultItems.getRequest().getUrl() + StrUtil.CRLF
                     + "title：" + resultItems.get("title").toString() + StrUtil.CRLF
                     + "category：" + resultItems.get("category").toString() + StrUtil.CRLF
                     + "time：" + resultItems.get("time").toString() + StrUtil.CRLF
                     + "total：" + resultItems.get("total").toString() + StrUtil.CRLF;
             log.info(stringBuilder);
-        }
     }
 }

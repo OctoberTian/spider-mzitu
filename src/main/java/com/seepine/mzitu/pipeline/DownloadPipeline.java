@@ -21,7 +21,7 @@ public class DownloadPipeline implements Pipeline {
 
     @Override
     public void process(ResultItems resultItems, Task task) {
-        if (resultItems.get("title") == null || CacheUtil.getInstance().contains(resultItems.getRequest().getUrl())) {
+        if (CacheUtil.getInstance().contains(resultItems.getRequest().getUrl())) {
             return;
         }
         Album album = new Album(resultItems.getRequest().getUrl(), resultItems.get("title").toString(), resultItems.get("time").toString(), resultItems.get("category").toString());
@@ -31,11 +31,21 @@ public class DownloadPipeline implements Pipeline {
         String imageUrlFirst = resultItems.get("imageUrl").toString();
         String urlPrefix = imageUrlFirst.substring(0, imageUrlFirst.length() - 6);
 
-        imageList.add(Image.builder()
-                .imageUrl(imageUrlFirst)
-                .referer(album.getUrl())
-                .fileName(String.format("%02d", 1) + ".jpg")
-                .build());
+        String[] urlArr = resultItems.getRequest().getUrl().split("/");
+        if(urlArr.length==5){
+            imageList.add(Image.builder()
+                    .imageUrl(imageUrlFirst)
+                    .referer(album.getUrl())
+                    .fileName(String.format("%02d", Integer.parseInt(urlArr[urlArr.length-1])) + ".jpg")
+                    .build());
+        }else{
+            imageList.add(Image.builder()
+                    .imageUrl(imageUrlFirst)
+                    .referer(album.getUrl())
+                    .fileName(String.format("%02d", 1) + ".jpg")
+                    .build());
+        }
+
 
         for (int i = 2; i < Integer.parseInt(resultItems.get("total").toString()); i++) {
             imageList.add(Image.builder()
