@@ -1,5 +1,7 @@
 package com.seepine.mzitu.util;
 
+import cn.hutool.core.img.Img;
+import cn.hutool.core.img.ImgUtil;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +35,19 @@ public class FileUtil {
 
     public boolean isValidFile(final String filePath) {
         File file = new File(filePath);
-        //至少图片大小要10KB才认定为有效,否则会重下
-        return file.exists() && file.isFile() && file.length() > 10 * 1024;
+        return file.exists() && file.isFile();
+    }
+
+    public boolean isValidImage(final String filePath) {
+        try {
+            ImgUtil.read(filePath).getAccelerationPriority();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isNotValidImage(final String filePath) {
+        return !isValidImage(filePath);
     }
 }

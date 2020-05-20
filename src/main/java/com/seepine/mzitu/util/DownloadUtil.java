@@ -37,13 +37,13 @@ public class DownloadUtil extends Thread {
                 for (Image item : album.getImageList()) {
                     try {
                         String filePath = album.getPath() + item.getFileName();
-                        if (!FileUtil.isValidFile(filePath)) {
+                        if (FileUtil.isNotValidImage(filePath)) {
                             FileUtil.createDir(album.getPath());
                             FileUtil.createFile(filePath);
                             Request request = new Request(item.getImageUrl());
                             request.addHeader("Referer", item.getReferer());
                             HttpUtil.downloadFile(request, filePath);
-                            log.info("文件已下载：" + filePath);
+                            log.info("文件下载完成：" + filePath);
                             ThreadUtil.sleep(CommonConstant.DOWNLOAD_MILLIS);
                         } else {
                             log.info("文件已下载：" + filePath);
