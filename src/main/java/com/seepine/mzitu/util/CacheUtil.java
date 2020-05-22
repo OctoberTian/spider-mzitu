@@ -30,7 +30,6 @@ public class CacheUtil {
         synchronized (alreadyList) {
             if (!alreadyList.contains(url)) {
                 alreadyList.add(url);
-                log.info("已全部爬取完成：" + url);
             }
         }
     }

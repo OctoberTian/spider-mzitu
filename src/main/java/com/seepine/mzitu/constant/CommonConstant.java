@@ -17,13 +17,17 @@ public interface CommonConstant {
      */
     int CRAWL_MILLIS = 5000;
     /**
-     * 图片下载延迟毫秒
-     */
-    long DOWNLOAD_MILLIS = 1000;
-    /**
      * 页面爬取线程数
      */
     int CRAWL_THREAD_NUM = 1;
+    /**
+     * 是否异步下载,true异步，false同步
+     */
+    boolean IS_ASYNC = true;
+    /**
+     * 图片下载延迟毫秒
+     */
+    long DOWNLOAD_MILLIS = 1000;
     /**
      * 下载图片线程数(ps: max <= 2*cpuNum)
      */

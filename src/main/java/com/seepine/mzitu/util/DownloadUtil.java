@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import us.codecraft.webmagic.Request;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Seepine
@@ -18,6 +19,8 @@ public class DownloadUtil extends Thread {
     static DownloadUtil downloadUtil;
 
     ExecutorService threadPool = ThreadUtil.newExecutor(CommonConstant.DOWNLOAD_THREAD_NUM);
+    AtomicInteger albumCount = new AtomicInteger(0);
+    AtomicInteger imageCount = new AtomicInteger(0);
 
     public static DownloadUtil getInstance() {
         if (downloadUtil == null) {
@@ -31,33 +34,44 @@ public class DownloadUtil extends Thread {
 
     public void put(Album album) {
         if (album != null) {
-            threadPool.execute(() -> {
-                log.info("thread " + Thread.currentThread().getId() + "启动任务");
-                int count = 0;
-                for (Image item : album.getImageList()) {
-                    try {
-                        String filePath = album.getPath() + item.getFileName();
-                        if (FileUtil.isNotValidImage(filePath)) {
-                            FileUtil.createDir(album.getPath());
-                            FileUtil.createFile(filePath);
-                            Request request = new Request(item.getImageUrl());
-                            request.addHeader("Referer", item.getReferer());
-                            HttpUtil.downloadFile(request, filePath);
-                            log.info("文件下载完成：" + filePath);
-                            ThreadUtil.sleep(CommonConstant.DOWNLOAD_MILLIS);
-                        } else {
-                            log.info("文件已下载：" + filePath);
-                        }
-                        count++;
-                    } catch (Exception e) {
-                        log.error("thread " + Thread.currentThread().getId() + ":" + e.getMessage());
+            if (CommonConstant.IS_ASYNC) {
+                threadPool.execute(() -> {
+                    download(album);
+                });
+            } else {
+                download(album);
+            }
+        }
+    }
+
+    public void download(Album album) {
+        if (album != null) {
+            int count = 0;
+            for (Image item : album.getImageList()) {
+                try {
+                    String filePath = album.getPath() + item.getFileName();
+                    if (FileUtil.isNotValidImage(filePath)) {
+                        FileUtil.createDir(album.getPath());
+                        FileUtil.createFile(filePath);
+                        Request request = new Request(item.getImageUrl());
+                        request.addHeader("Referer", item.getReferer());
+                        HttpUtil.downloadFile(request, filePath);
+                        log.info("文件下载完成：" + filePath);
+                        imageCount.getAndIncrement();
+                        ThreadUtil.sleep(CommonConstant.DOWNLOAD_MILLIS);
+                    } else {
+                        log.info("文件已下载：" + filePath);
                     }
+                    count++;
+                } catch (Exception e) {
+                    log.error("thread " + Thread.currentThread().getId() + ":" + e.getMessage());
                 }
-                if (count == album.getImageList().size()) {
-                    CacheUtil.getInstance().push(album.getUrl());
-                }
-                log.info("thread " + Thread.currentThread().getId() + "结束任务");
-            });
+            }
+            if (count == album.getImageList().size()) {
+                CacheUtil.getInstance().push(album.getUrl());
+                albumCount.getAndIncrement();
+            }
+            log.info("本次累计爬取图集：" + albumCount.get() + ",累计下载图片：" + imageCount.get());
         }
     }
 }
