@@ -51,5 +51,8 @@ public interface CommonConstant {
             //new Proxy("ip", port)
             //new Proxy("ip", port,"username","password")
     };
+    /**
+     * 是否开启自动获取代理
+     */
     boolean OPEN_AUTO_PROXY = false;
 }
