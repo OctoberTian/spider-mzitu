@@ -1,6 +1,10 @@
 package com.seepine.mzitu.downloader;
 
+import cn.hutool.core.io.FileUtil;
+import com.seepine.mzitu.constant.CommonConstant;
+import com.seepine.mzitu.util.HttpClientGeneratorUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -19,6 +23,7 @@ import us.codecraft.webmagic.utils.CharsetUtils;
 import us.codecraft.webmagic.utils.HttpClientUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +53,7 @@ public class MyHttpClientDownloader extends AbstractDownloader {
         this.proxyProvider = proxyProvider;
     }
 
-    private CloseableHttpClient getHttpClient(Site site) {
+    public CloseableHttpClient getHttpClient(Site site) {
         if (site == null) {
             return null;
         }
@@ -125,6 +130,22 @@ public class MyHttpClientDownloader extends AbstractDownloader {
                 proxyProvider.returnProxy(proxy, page, task);
             }
         }
+    }
+
+    public void downloadFile(Request request, String destFileName) throws IOException {
+        CloseableHttpClient httpClient = getHttpClient(CommonConstant.SITE);
+        Proxy proxy = null;
+        try {
+            proxy = proxyProvider.getProxy(null);
+        } catch (Exception ignored) {
+        }
+        HttpClientRequestContext requestContext = httpUriRequestConverter.convert(request, CommonConstant.SITE, proxy);
+        CloseableHttpResponse httpResponse = httpClient.execute(requestContext.getHttpUriRequest(), requestContext.getHttpClientContext());
+        HttpEntity entity = httpResponse.getEntity();
+        InputStream in = entity.getContent();
+        FileUtil.writeFromStream(in, destFileName);
+        in.close();
+        EntityUtils.consumeQuietly(httpResponse.getEntity());
     }
 
     @Override

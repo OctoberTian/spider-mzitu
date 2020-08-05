@@ -15,7 +15,7 @@ public interface CommonConstant {
     /**
      * 页面爬取延迟毫秒
      */
-    int CRAWL_MILLIS = 5000;
+    int CRAWL_MILLIS = 500;
     /**
      * 页面爬取线程数
      */
@@ -23,15 +23,15 @@ public interface CommonConstant {
     /**
      * 是否异步下载,true异步，false同步
      */
-    boolean IS_ASYNC = true;
+    boolean IS_ASYNC = false;
     /**
      * 图片下载延迟毫秒
      */
-    long DOWNLOAD_MILLIS = 1000;
+    long DOWNLOAD_MILLIS = 600;
     /**
      * 下载图片线程数(ps: max <= 2*cpuNum)
      */
-    int DOWNLOAD_THREAD_NUM = 1;
+    int DOWNLOAD_THREAD_NUM = 2;
     /**
      * 爬取Site配置
      */
@@ -51,4 +51,5 @@ public interface CommonConstant {
             //new Proxy("ip", port)
             //new Proxy("ip", port,"username","password")
     };
+    boolean OPEN_AUTO_PROXY = false;
 }
